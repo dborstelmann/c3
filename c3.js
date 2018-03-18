@@ -197,8 +197,22 @@ var sanitise = function sanitise(str) {
     return typeof str === 'string' ? str.replace(/</g, '&lt;').replace(/>/g, '&gt;') : str;
 };
 var getPathBox = function getPathBox(path) {
+
+    // HACK FOR LOCKERSERVICE
+    var seg0, seg1;
+    if (path.pathSegList) {
+        seg0 = path.pathSegList.getItem(0),
+        seg1 = path.pathSegList.getItem(1),
+    } else {
+        if (!window.SVGPathSegList) {
+            addSVGPathSegListToWindow();
+        }
+        seg0 = new window.SVGPathSegList(path).getItem(0);
+        seg1 = new window.SVGPathSegList(path).getItem(1);
+    }
+
     var box = path.getBoundingClientRect(),
-        items = [path.pathSegList.getItem(0), path.pathSegList.getItem(1)],
+        items = [seg0, seg1],
         minX = items[0].x,
         minY = Math.min(items[0].y, items[1].y);
     return { x: minX, y: minY, width: box.width, height: box.height };
@@ -2159,7 +2173,7 @@ if (!Function.prototype.bind) {
 // SVG2 (https://lists.w3.org/Archives/Public/www-svg/2015Jun/0044.html), including the latest spec
 // changes which were implemented in Firefox 43 and Chrome 46.
 
-(function () {
+var addSVGPathSegListToWindow = function () {
     if (!("SVGPathSeg" in window)) {
         // Spec: http://www.w3.org/TR/SVG11/single-page.html#paths-InterfaceSVGPathSeg
         window.SVGPathSeg = function (type, typeAsLetter, owningPathSegList) {
@@ -2918,6 +2932,11 @@ if (!Function.prototype.bind) {
 
         // Add the pathSegList accessors to window.SVGPathElement.
         // Spec: http://www.w3.org/TR/SVG11/single-page.html#paths-InterfaceSVGAnimatedPathData
+
+				function getSvgPathSegList(elem) {
+					return window.SVGPathSegList(elem);
+				}
+
         Object.defineProperty(window.SVGPathElement.prototype, "pathSegList", {
             get: function get() {
                 if (!this._pathSegList) this._pathSegList = new window.SVGPathSegList(this);
@@ -3355,7 +3374,9 @@ if (!Function.prototype.bind) {
             return builder.pathSegList;
         };
     }
-})();
+};
+
+addSVGPathSegListToWindow();
 
 /* jshint ignore:end */
 
@@ -7594,9 +7615,21 @@ c3_chart_internal_fn.generateGetBarPoints = function (barIndices, isSub) {
     };
 };
 c3_chart_internal_fn.isWithinBar = function (mouse, that) {
-    var box = that.getBoundingClientRect(),
+
+    // HACK FOR LOCKERSERVICE
+    var seg0, seg1;
+    if (that.pathSegList) {
         seg0 = that.pathSegList.getItem(0),
         seg1 = that.pathSegList.getItem(1),
+    } else {
+        if (!window.SVGPathSegList) {
+            addSVGPathSegListToWindow();
+        }
+        seg0 = new window.SVGPathSegList(that).getItem(0);
+        seg1 = new window.SVGPathSegList(that).getItem(1);
+    }
+
+    var box = that.getBoundingClientRect(),
         x = Math.min(seg0.x, seg1.x),
         y = Math.min(seg0.y, seg1.y),
         w = box.width,
@@ -7606,6 +7639,7 @@ c3_chart_internal_fn.isWithinBar = function (mouse, that) {
         ex = x + w + offset,
         sy = y + h + offset,
         ey = y - offset;
+
     return sx < mouse[0] && mouse[0] < ex && ey < mouse[1] && mouse[1] < sy;
 };
 
