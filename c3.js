@@ -201,8 +201,8 @@ var getPathBox = function getPathBox(path) {
     // HACK FOR LOCKERSERVICE
     var seg0, seg1;
     if (path.pathSegList) {
-        seg0 = path.pathSegList.getItem(0),
-        seg1 = path.pathSegList.getItem(1),
+        seg0 = path.pathSegList.getItem(0);
+        seg1 = path.pathSegList.getItem(1);
     } else {
         if (!window.SVGPathSegList) {
             addSVGPathSegListToWindow();
@@ -7619,8 +7619,8 @@ c3_chart_internal_fn.isWithinBar = function (mouse, that) {
     // HACK FOR LOCKERSERVICE
     var seg0, seg1;
     if (that.pathSegList) {
-        seg0 = that.pathSegList.getItem(0),
-        seg1 = that.pathSegList.getItem(1),
+        seg0 = that.pathSegList.getItem(0);
+        seg1 = that.pathSegList.getItem(1);
     } else {
         if (!window.SVGPathSegList) {
             addSVGPathSegListToWindow();
